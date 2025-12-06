@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+  <head>
+    <title>GitLab Time Tracker</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 10px;
+        width: 300px;
+      }
+      .timer-container {
+        margin-bottom: 15px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+      .timer-info {
+        font-size: 14px;
+      }
+      .timer-actions {
+        margin-top: 10px;
+      }
+      .no-timer {
+        text-align: center;
+        color: #888;
+      }
+      #settings-link {
+        display: block;
+        margin-top: 10px;
+        text-align: right;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>GitLab Time Tracker</h1>
+
+    <div id="timer-display" class="timer-container">
+      <!-- Timer info will be injected here -->
+    </div>
+
+    <h2>Recent Tasks</h2>
+    <ul id="recent-tasks">
+      <!-- Recent tasks will be listed here -->
+      <li>Placeholder: Recent task 1</li>
+    </ul>
+
+    <h2>Favorites</h2>
+    <ul id="favorite-tasks">
+      <!-- Favorite tasks will be listed here -->
+      <li>Placeholder: Favorite task 1</li>
+    </ul>
+
+    <a href="settings.html" id="settings-link" target="_blank">Settings</a>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
