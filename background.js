@@ -19,6 +19,22 @@ function updateBadge() {
   }
 }
 
+function broadcastTimerState() {
+  chrome.tabs.query({}, (tabs) => {
+    for (const tab of tabs) {
+      chrome.tabs
+        .sendMessage(tab.id, {
+          action: "timerStateChanged",
+          timerState: {
+            isRunning: timerState.isRunning,
+            issue: timerState.issue,
+          },
+        })
+        .catch(() => {});
+    }
+  });
+}
+
 function postTimeToGitLab(issue, timeSpentInSeconds) {
   chrome.storage.sync.get(["gitlabUrl", "apiToken"], (result) => {
     if (result.gitlabUrl && result.apiToken) {
@@ -58,6 +74,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       timerState.startTime = Date.now();
       timerState.timerId = setInterval(updateBadge, 1000);
       chrome.storage.local.set({ timerState });
+      broadcastTimerState();
     }
     sendResponse({ status: "Timer started" });
   } else if (request.action === "stopTimer") {
@@ -74,6 +91,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       timerState.timerId = null;
       chrome.storage.local.set({ timerState });
       updateBadge();
+      broadcastTimerState();
     }
     sendResponse({ status: "Timer stopped" });
   } else if (request.action === "getTimerState") {

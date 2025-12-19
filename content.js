@@ -141,6 +141,23 @@ chrome.storage.sync.get(["gitlabUrl"], (result) => {
       subtree: true,
     });
 
+    // Listen for timer state changes from background script
+    chrome.runtime.onMessage.addListener((request) => {
+      if (request.action === "timerStateChanged") {
+        const button = document.getElementById("gitlab-timer-start-button");
+        if (button) {
+          const issueDetails = getIssueDetails();
+          if (issueDetails) {
+            const isRunning =
+              request.timerState.isRunning &&
+              request.timerState.issue &&
+              request.timerState.issue.id === issueDetails.id;
+            updateButtonState(button, isRunning, issueDetails);
+          }
+        }
+      }
+    });
+
     // Also run on load
     injectStartButton();
   }
