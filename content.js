@@ -52,6 +52,32 @@ chrome.storage.sync.get(["gitlabUrl"], (result) => {
       return null;
     }
 
+    function updateButtonState(button, isRunning, issueDetails) {
+      if (isRunning) {
+        button.textContent = "Stop Timer";
+        button.className = "btn gl-button btn-danger btn-md gl-ml-3";
+        button.onclick = () => {
+          chrome.runtime.sendMessage({ action: "stopTimer" }, () => {
+            updateButtonState(button, false, issueDetails);
+          });
+        };
+      } else {
+        button.textContent = "Start Timer";
+        button.className = "btn gl-button btn-default btn-md gl-ml-3";
+        button.onclick = () => {
+          chrome.runtime.sendMessage(
+            {
+              action: "startTimer",
+              issue: issueDetails,
+            },
+            () => {
+              updateButtonState(button, true, issueDetails);
+            },
+          );
+        };
+      }
+    }
+
     function injectStartButton() {
       const issueDetails = getIssueDetails();
       if (
@@ -67,20 +93,21 @@ chrome.storage.sync.get(["gitlabUrl"], (result) => {
         if (titleElement) {
           const button = document.createElement("button");
           button.id = "gitlab-timer-start-button";
-          button.textContent = "Start Timer";
-          button.className = "btn gl-button btn-default btn-md gl-ml-3";
           button.style.cssText =
             "vertical-align: middle; margin-left: 12px; cursor: pointer;";
 
-          button.onclick = () => {
-            chrome.runtime.sendMessage({
-              action: "startTimer",
-              issue: issueDetails,
-            });
-            button.textContent = "Timer Started";
-            button.disabled = true;
-            button.style.opacity = "0.6";
-          };
+          // Check current timer state and set button accordingly
+          chrome.runtime.sendMessage(
+            { action: "getTimerState" },
+            (response) => {
+              const isRunning =
+                response &&
+                response.isRunning &&
+                response.issue &&
+                response.issue.id === issueDetails.id;
+              updateButtonState(button, isRunning, issueDetails);
+            },
+          );
 
           // Insert button after the title element
           titleElement.parentNode.insertBefore(
