@@ -103,7 +103,7 @@ chrome.storage.sync.get(["gitlabUrl"], (result) => {
           const button = document.createElement("button");
           button.id = "gitlab-timer-start-button";
           button.style.cssText =
-            "vertical-align: middle; margin-left: 12px; cursor: pointer; border-radius: 4px; padding: 6px 8px; border: none; display: inline-flex; align-items: center; justify-content: center;";
+            "vertical-align: middle; margin-left: 8px; cursor: pointer; border-radius: 4px; padding: 4px 6px; border: none; display: inline-flex; align-items: center; justify-content: center;";
 
           // Check current timer state and set button accordingly
           chrome.runtime.sendMessage(
@@ -118,11 +118,13 @@ chrome.storage.sync.get(["gitlabUrl"], (result) => {
             },
           );
 
-          // Insert button after the title element
-          titleElement.parentNode.insertBefore(
-            button,
-            titleElement.nextSibling,
-          );
+          // Insert button inside the h1, after the title text span
+          const titleSpan = titleElement.querySelector("span");
+          if (titleSpan) {
+            titleSpan.parentNode.insertBefore(button, titleSpan.nextSibling);
+          } else {
+            titleElement.appendChild(button);
+          }
           console.log("Start Timer button injected.");
         }
       }
