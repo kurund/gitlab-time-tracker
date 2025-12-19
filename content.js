@@ -52,18 +52,27 @@ chrome.storage.sync.get(["gitlabUrl"], (result) => {
       return null;
     }
 
+    const playIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
+    const stopIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12"/></svg>`;
+
     function updateButtonState(button, isRunning, issueDetails) {
       if (isRunning) {
-        button.textContent = "Stop Timer";
-        button.className = "btn gl-button btn-danger btn-md gl-ml-3";
+        button.innerHTML = stopIcon;
+        button.title = "Stop Timer";
+        button.style.backgroundColor = "#dc3545";
+        button.style.borderColor = "#dc3545";
+        button.style.color = "#fff";
         button.onclick = () => {
           chrome.runtime.sendMessage({ action: "stopTimer" }, () => {
             updateButtonState(button, false, issueDetails);
           });
         };
       } else {
-        button.textContent = "Start Timer";
-        button.className = "btn gl-button btn-default btn-md gl-ml-3";
+        button.innerHTML = playIcon;
+        button.title = "Start Timer";
+        button.style.backgroundColor = "#1f75cb";
+        button.style.borderColor = "#1f75cb";
+        button.style.color = "#fff";
         button.onclick = () => {
           chrome.runtime.sendMessage(
             {
@@ -94,7 +103,7 @@ chrome.storage.sync.get(["gitlabUrl"], (result) => {
           const button = document.createElement("button");
           button.id = "gitlab-timer-start-button";
           button.style.cssText =
-            "vertical-align: middle; margin-left: 12px; cursor: pointer;";
+            "vertical-align: middle; margin-left: 12px; cursor: pointer; border-radius: 4px; padding: 6px 8px; border: none; display: inline-flex; align-items: center; justify-content: center;";
 
           // Check current timer state and set button accordingly
           chrome.runtime.sendMessage(
