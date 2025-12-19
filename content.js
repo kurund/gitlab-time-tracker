@@ -58,16 +58,19 @@ chrome.storage.sync.get(["gitlabUrl"], (result) => {
         issueDetails &&
         !document.getElementById("gitlab-timer-start-button")
       ) {
-        const target = document.querySelector(
-          ".gl-disclosure-dropdown.gl-new-dropdown",
+        // Try to find the title element and inject button next to it
+        const titleElement = document.querySelector(
+          'h1[data-testid="work-item-title"]',
         );
-        console.log("Target element for button injection:", target);
-        if (target) {
+        console.log("Title element for button injection:", titleElement);
+
+        if (titleElement) {
           const button = document.createElement("button");
           button.id = "gitlab-timer-start-button";
-          button.style.marginRight = "10px"; // Added margin to separate from the dropdown
           button.textContent = "Start Timer";
-          button.className = "btn gl-button"; // Adding GitLab's button classes for styling
+          button.className = "btn gl-button btn-default btn-md gl-ml-3";
+          button.style.cssText =
+            "vertical-align: middle; margin-left: 12px; cursor: pointer;";
 
           button.onclick = () => {
             chrome.runtime.sendMessage({
@@ -76,9 +79,14 @@ chrome.storage.sync.get(["gitlabUrl"], (result) => {
             });
             button.textContent = "Timer Started";
             button.disabled = true;
+            button.style.opacity = "0.6";
           };
 
-          target.prepend(button); // Use prepend to place it before the dropdown
+          // Insert button after the title element
+          titleElement.parentNode.insertBefore(
+            button,
+            titleElement.nextSibling,
+          );
           console.log("Start Timer button injected.");
         }
       }
