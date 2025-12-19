@@ -3,54 +3,291 @@
   <head>
     <title>GitLab Time Tracker</title>
     <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
       body {
-        font-family: sans-serif;
-        padding: 10px;
-        width: 300px;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        width: 320px;
+        background: #fafafa;
+        color: #303030;
       }
-      .timer-container {
-        margin-bottom: 15px;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
+
+      .header {
+        background: #1f75cb;
+        color: white;
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
       }
-      .timer-info {
+
+      .header svg {
+        width: 20px;
+        height: 20px;
+      }
+
+      .header h1 {
         font-size: 14px;
+        font-weight: 600;
       }
+
+      .timer-section {
+        padding: 16px;
+        background: white;
+        border-bottom: 1px solid #e5e5e5;
+      }
+
+      .timer-active {
+        text-align: center;
+      }
+
+      .timer-issue {
+        font-size: 13px;
+        color: #666;
+        margin-bottom: 8px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .timer-issue a {
+        color: #1f75cb;
+        text-decoration: none;
+      }
+
+      .timer-issue a:hover {
+        text-decoration: underline;
+      }
+
+      .timer-time {
+        font-size: 36px;
+        font-weight: 600;
+        font-family: "SF Mono", Monaco, monospace;
+        color: #1f75cb;
+        margin: 8px 0;
+      }
+
       .timer-actions {
-        margin-top: 10px;
+        margin-top: 12px;
       }
+
+      .btn {
+        border: none;
+        border-radius: 4px;
+        padding: 8px 16px;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: background-color 0.2s;
+      }
+
+      .btn-stop {
+        background: #dc3545;
+        color: white;
+      }
+
+      .btn-stop:hover {
+        background: #c82333;
+      }
+
+      .btn-start {
+        background: #1f75cb;
+        color: white;
+      }
+
+      .btn-start:hover {
+        background: #1a63a8;
+      }
+
       .no-timer {
         text-align: center;
         color: #888;
+        font-size: 13px;
+        padding: 8px 0;
       }
-      #settings-link {
-        display: block;
-        margin-top: 10px;
-        text-align: right;
+
+      .section {
+        padding: 12px 16px;
+        background: white;
+        border-bottom: 1px solid #e5e5e5;
+      }
+
+      .section-header {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: #666;
+        margin-bottom: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .task-list {
+        list-style: none;
+      }
+
+      .task-item {
+        display: flex;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid #f0f0f0;
+        gap: 8px;
+      }
+
+      .task-item:last-child {
+        border-bottom: none;
+      }
+
+      .task-info {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .task-title {
+        font-size: 13px;
+        color: #303030;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .task-title a {
+        color: #303030;
+        text-decoration: none;
+      }
+
+      .task-title a:hover {
+        color: #1f75cb;
+      }
+
+      .task-meta {
+        font-size: 11px;
+        color: #888;
+      }
+
+      .task-actions {
+        display: flex;
+        gap: 4px;
+      }
+
+      .icon-btn {
+        background: none;
+        border: none;
+        padding: 4px;
+        cursor: pointer;
+        color: #888;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .icon-btn:hover {
+        background: #f0f0f0;
+        color: #1f75cb;
+      }
+
+      .icon-btn.favorite {
+        color: #f5a623;
+      }
+
+      .icon-btn svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      .empty-state {
+        text-align: center;
+        color: #888;
+        font-size: 12px;
+        padding: 12px 0;
+      }
+
+      .footer {
+        padding: 12px 16px;
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      .footer a {
+        font-size: 12px;
+        color: #666;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .footer a:hover {
+        color: #1f75cb;
+      }
+
+      .footer svg {
+        width: 14px;
+        height: 14px;
       }
     </style>
   </head>
   <body>
-    <h1>GitLab Time Tracker</h1>
-
-    <div id="timer-display" class="timer-container">
-      <!-- Timer info will be injected here -->
+    <div class="header">
+      <svg viewBox="0 0 100 100" fill="currentColor">
+        <g fill="none" stroke="currentColor" stroke-width="8">
+          <circle cx="50" cy="55" r="40" />
+          <g stroke-linecap="round">
+            <line x1="40" y1="8" x2="60" y2="8" />
+            <line x1="50" y1="8" x2="50" y2="15" />
+          </g>
+        </g>
+        <polygon points="42,45 68,55 42,65" fill="currentColor" />
+      </svg>
+      <h1>GitLab Time Tracker</h1>
     </div>
 
-    <h2>Recent Tasks</h2>
-    <ul id="recent-tasks">
-      <!-- Recent tasks will be listed here -->
-      <li>Placeholder: Recent task 1</li>
-    </ul>
+    <div class="timer-section">
+      <div id="timer-display">
+        <!-- Timer info will be injected here -->
+      </div>
+    </div>
 
-    <h2>Favorites</h2>
-    <ul id="favorite-tasks">
-      <!-- Favorite tasks will be listed here -->
-      <li>Placeholder: Favorite task 1</li>
-    </ul>
+    <div class="section">
+      <div class="section-header">Recent Tasks</div>
+      <ul id="recent-tasks" class="task-list">
+        <!-- Recent tasks will be listed here -->
+      </ul>
+    </div>
 
-    <a href="settings.html" id="settings-link" target="_blank">Settings</a>
+    <div class="section">
+      <div class="section-header">Favorites</div>
+      <ul id="favorite-tasks" class="task-list">
+        <!-- Favorite tasks will be listed here -->
+      </ul>
+    </div>
+
+    <div class="footer">
+      <a href="settings.html" target="_blank">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="12" cy="12" r="3" />
+          <path
+            d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+          />
+        </svg>
+        Settings
+      </a>
+    </div>
 
     <script src="popup.js"></script>
   </body>

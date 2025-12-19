@@ -35,6 +35,32 @@ function broadcastTimerState() {
   });
 }
 
+function addToRecentTasks(issue, timeSpent) {
+  chrome.storage.local.get(["recentTasks"], (result) => {
+    let recentTasks = result.recentTasks || [];
+
+    // Create task entry with timestamp
+    const taskEntry = {
+      ...issue,
+      lastTracked: Date.now(),
+      lastTimeSpent: timeSpent,
+    };
+
+    // Remove existing entry for same issue
+    recentTasks = recentTasks.filter(
+      (t) => !(t.projectId === issue.projectId && t.id === issue.id),
+    );
+
+    // Add to beginning
+    recentTasks.unshift(taskEntry);
+
+    // Keep only last 10 tasks
+    recentTasks = recentTasks.slice(0, 10);
+
+    chrome.storage.local.set({ recentTasks });
+  });
+}
+
 function postTimeToGitLab(issue, timeSpentInSeconds) {
   chrome.storage.sync.get(["gitlabUrl", "apiToken"], (result) => {
     if (result.gitlabUrl && result.apiToken) {
@@ -84,6 +110,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       const timeSpent = Math.round((endTime - timerState.startTime) / 1000);
 
       postTimeToGitLab(timerState.issue, timeSpent);
+      addToRecentTasks(timerState.issue, timeSpent);
 
       timerState.isRunning = false;
       timerState.issue = null;

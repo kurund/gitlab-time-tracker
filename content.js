@@ -44,6 +44,7 @@ chrome.storage.sync.get(["gitlabUrl"], (result) => {
           title: title,
           id: issueId,
           projectId: projectId,
+          url: window.location.href,
         };
         console.log("Issue details found:", issueDetails);
         return issueDetails;
