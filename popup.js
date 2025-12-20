@@ -60,37 +60,60 @@ function updateTimerDisplay(timerState) {
 
     const update = () => {
       const elapsed = Date.now() - timerState.startTime;
-      timerDisplay.innerHTML = `
-        <div class="timer-active">
-          <div class="timer-issue">
-            <a href="${getIssueUrl(timerState.issue)}" target="_blank" title="${timerState.issue.title}">
-              ${timerState.issue.title} (#${timerState.issue.id})
-            </a>
-          </div>
-          <div class="timer-time">${formatTime(elapsed)}</div>
-          <div class="timer-actions">
-            <button id="stop-button" class="btn btn-stop">
-              ${stopIcon} Stop
-            </button>
-            <button id="cancel-button" class="cancel-link">
-              Cancel
-            </button>
-          </div>
-        </div>
-      `;
-      document.getElementById("stop-button").onclick = () => {
+      timerDisplay.innerHTML = ""; // Clear the display
+
+      const timerActive = document.createElement("div");
+      timerActive.className = "timer-active";
+
+      const timerIssue = document.createElement("div");
+      timerIssue.className = "timer-issue";
+
+      const issueLink = document.createElement("a");
+      issueLink.href = getIssueUrl(timerState.issue);
+      issueLink.target = "_blank";
+      issueLink.title = timerState.issue.title;
+      issueLink.textContent = `${timerState.issue.title} (#${timerState.issue.id})`;
+
+      timerIssue.appendChild(issueLink);
+
+      const timerTime = document.createElement("div");
+      timerTime.className = "timer-time";
+      timerTime.textContent = formatTime(elapsed);
+
+      const timerActions = document.createElement("div");
+      timerActions.className = "timer-actions";
+
+      const stopButton = document.createElement("button");
+      stopButton.id = "stop-button";
+      stopButton.className = "btn btn-stop";
+      stopButton.innerHTML = `${stopIcon} Stop`;
+      stopButton.onclick = () => {
         chrome.runtime.sendMessage({ action: "stopTimer" }, () => {
           if (timerInterval) clearInterval(timerInterval);
           updateTimerDisplay(null);
           loadTasks();
         });
       };
-      document.getElementById("cancel-button").onclick = () => {
+
+      const cancelButton = document.createElement("button");
+      cancelButton.id = "cancel-button";
+      cancelButton.className = "cancel-link";
+      cancelButton.textContent = "Cancel";
+      cancelButton.onclick = () => {
         chrome.runtime.sendMessage({ action: "cancelTimer" }, () => {
           if (timerInterval) clearInterval(timerInterval);
           updateTimerDisplay(null);
         });
       };
+
+      timerActions.appendChild(stopButton);
+      timerActions.appendChild(cancelButton);
+
+      timerActive.appendChild(timerIssue);
+      timerActive.appendChild(timerTime);
+      timerActive.appendChild(timerActions);
+
+      timerDisplay.appendChild(timerActive);
     };
 
     update();
@@ -345,7 +368,7 @@ clearSearchBtn.addEventListener("click", () => {
 // Initialize
 document.addEventListener("DOMContentLoaded", () => {
   // Load GitLab URL
-  chrome.storage.sync.get(["gitlabUrl"], (result) => {
+  chrome.storage.local.get(["gitlabUrl"], (result) => {
     gitlabUrl = result.gitlabUrl || "";
   });
 
@@ -401,7 +424,7 @@ function showTasksView() {
 }
 
 function loadSettings() {
-  chrome.storage.sync.get(["gitlabUrl", "apiToken"], (result) => {
+  chrome.storage.local.get(["gitlabUrl", "apiToken"], (result) => {
     gitlabUrlInput.value = result.gitlabUrl || "";
     apiTokenInput.value = result.apiToken || "";
   });
@@ -416,7 +439,7 @@ function saveSettings() {
     return;
   }
 
-  chrome.storage.sync.set(
+  chrome.storage.local.set(
     { gitlabUrl: newGitlabUrl, apiToken: newApiToken },
     () => {
       gitlabUrl = newGitlabUrl;

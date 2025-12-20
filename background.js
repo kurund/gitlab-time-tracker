@@ -105,7 +105,7 @@ function broadcastMessage(message, isError = false) {
 }
 
 function postTimeToGitLab(issue, timeSpentInSeconds) {
-  chrome.storage.sync.get(["gitlabUrl", "apiToken"], (result) => {
+  chrome.storage.local.get(["gitlabUrl", "apiToken"], (result) => {
     if (!result.gitlabUrl || !result.apiToken) {
       broadcastMessage(
         "Please set your GitLab URL and API token in settings.",
@@ -211,7 +211,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   } else if (request.action === "logTime") {
     // Manual time entry
     const { issue, duration } = request;
-    chrome.storage.sync.get(["gitlabUrl", "apiToken"], (result) => {
+    chrome.storage.local.get(["gitlabUrl", "apiToken"], (result) => {
       if (!result.gitlabUrl || !result.apiToken) {
         sendResponse({
           success: false,
