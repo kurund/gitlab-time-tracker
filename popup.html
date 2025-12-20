@@ -107,6 +107,11 @@
         background: #1a63a8;
       }
 
+      .btn-sm {
+        padding: 4px 8px;
+        font-size: 11px;
+      }
+
       .no-timer {
         text-align: center;
         color: #888;
@@ -131,20 +136,78 @@
         align-items: center;
       }
 
+      .search-box {
+        position: relative;
+        margin-bottom: 8px;
+      }
+
+      .search-box input {
+        width: 100%;
+        padding: 8px 12px 8px 32px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 13px;
+        outline: none;
+      }
+
+      .search-box input:focus {
+        border-color: #1f75cb;
+      }
+
+      .search-box svg {
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 14px;
+        height: 14px;
+        color: #888;
+      }
+
+      .search-box .clear-btn {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #888;
+        padding: 2px;
+        display: none;
+      }
+
+      .search-box .clear-btn.visible {
+        display: block;
+      }
+
+      .search-box .clear-btn:hover {
+        color: #333;
+      }
+
       .task-list {
         list-style: none;
+        max-height: 300px;
+        overflow-y: auto;
       }
 
       .task-item {
-        display: flex;
-        align-items: center;
         padding: 8px 0;
         border-bottom: 1px solid #f0f0f0;
-        gap: 8px;
       }
 
       .task-item:last-child {
         border-bottom: none;
+      }
+
+      .task-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .fav-btn {
+        flex-shrink: 0;
       }
 
       .task-info {
@@ -176,7 +239,7 @@
 
       .task-actions {
         display: flex;
-        gap: 4px;
+        gap: 2px;
       }
 
       .icon-btn {
@@ -200,6 +263,10 @@
         color: #f5a623;
       }
 
+      .icon-btn.delete:hover {
+        color: #dc3545;
+      }
+
       .icon-btn svg {
         width: 16px;
         height: 16px;
@@ -210,6 +277,43 @@
         color: #888;
         font-size: 12px;
         padding: 12px 0;
+      }
+
+      .time-entry {
+        display: flex;
+        gap: 6px;
+        margin-top: 8px;
+        padding: 10px;
+        background: #f0f4f8;
+        border-radius: 6px;
+        border: 1px solid #e0e6ed;
+        animation: slideDown 0.15s ease-out;
+      }
+
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .time-entry input {
+        flex: 1;
+        padding: 6px 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 13px;
+        min-width: 0;
+      }
+
+      .time-entry input:focus {
+        outline: none;
+        border-color: #1f75cb;
+        box-shadow: 0 0 0 2px rgba(31, 117, 203, 0.1);
       }
 
       .footer {
@@ -235,6 +339,25 @@
         width: 14px;
         height: 14px;
       }
+
+      .message {
+        padding: 8px 12px;
+        margin-bottom: 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 500;
+        text-align: center;
+      }
+
+      .message.success {
+        background: #e8f5e9;
+        color: #2e7d32;
+      }
+
+      .message.error {
+        background: #fde8e8;
+        color: #c62828;
+      }
     </style>
   </head>
   <body>
@@ -259,16 +382,21 @@
     </div>
 
     <div class="section">
-      <div class="section-header">Recent Tasks</div>
-      <ul id="recent-tasks" class="task-list">
-        <!-- Recent tasks will be listed here -->
-      </ul>
-    </div>
-
-    <div class="section">
-      <div class="section-header">Favorites</div>
-      <ul id="favorite-tasks" class="task-list">
-        <!-- Favorite tasks will be listed here -->
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8" />
+          <path d="M21 21l-4.35-4.35" />
+        </svg>
+        <input type="text" id="search-input" placeholder="Search tasks..." />
+        <button class="clear-btn" id="clear-search">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="section-header">Tasks</div>
+      <ul id="task-list" class="task-list">
+        <!-- Tasks will be listed here -->
       </ul>
     </div>
 

@@ -174,6 +174,51 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     sendResponse({ status: "Timer stopped" });
   } else if (request.action === "getTimerState") {
     sendResponse(timerState);
+  } else if (request.action === "logTime") {
+    // Manual time entry
+    const { issue, duration } = request;
+    chrome.storage.sync.get(["gitlabUrl", "apiToken"], (result) => {
+      if (!result.gitlabUrl || !result.apiToken) {
+        sendResponse({ success: false, error: "Please configure GitLab settings" });
+        return;
+      }
+
+      const { gitlabUrl, apiToken } = result;
+      const { projectId, id: issueId } = issue;
+      const url = `${gitlabUrl}/api/v4/projects/${projectId}/issues/${issueId}/add_spent_time`;
+
+      fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "PRIVATE-TOKEN": apiToken,
+        },
+        body: JSON.stringify({ duration }),
+      })
+        .then(async (response) => {
+          let data;
+          try {
+            data = await response.json();
+          } catch (e) {
+            data = {};
+          }
+
+          if (!response.ok) {
+            const errorMsg = data.message || data.error || `HTTP ${response.status}`;
+            sendResponse({ success: false, error: errorMsg });
+            return;
+          }
+
+          console.log("Time logged manually:", data);
+          addToRecentTasks(issue, 0);
+          sendResponse({ success: true });
+        })
+        .catch((error) => {
+          console.error("Error logging time:", error);
+          sendResponse({ success: false, error: error.message });
+        });
+    });
+    return true; // Keep channel open for async response
   }
   return true; // Keep the message channel open for async response
 });
