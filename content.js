@@ -74,9 +74,15 @@ chrome.storage.sync.get(["gitlabUrl"], (result) => {
     }
 
     function updateButtonState(button, isRunning, issueDetails) {
+      // Remove existing cancel button if any
+      const existingCancel = document.getElementById(
+        "gitlab-timer-cancel-button",
+      );
+      if (existingCancel) existingCancel.remove();
+
       if (isRunning) {
         button.innerHTML = stopIcon;
-        button.title = "Stop Timer";
+        button.title = "Stop & Log Time";
         button.style.backgroundColor = "#554488";
         button.style.borderColor = "#554488";
         button.style.color = "#fff";
@@ -85,6 +91,26 @@ chrome.storage.sync.get(["gitlabUrl"], (result) => {
             updateButtonState(button, false, issueDetails);
           });
         };
+
+        // Add cancel button
+        const cancelBtn = document.createElement("button");
+        cancelBtn.id = "gitlab-timer-cancel-button";
+        cancelBtn.textContent = "Cancel";
+        cancelBtn.title = "Cancel timer without logging";
+        cancelBtn.style.cssText =
+          "vertical-align: middle; margin-left: 6px; cursor: pointer; border-radius: 4px; padding: 4px 8px; border: none; background: none; color: #888; font-size: 12px;";
+        cancelBtn.onmouseover = () => {
+          cancelBtn.style.color = "#554488";
+        };
+        cancelBtn.onmouseout = () => {
+          cancelBtn.style.color = "#888";
+        };
+        cancelBtn.onclick = () => {
+          safeSendMessage({ action: "cancelTimer" }, () => {
+            updateButtonState(button, false, issueDetails);
+          });
+        };
+        button.parentNode.insertBefore(cancelBtn, button.nextSibling);
       } else {
         button.innerHTML = playIcon;
         button.title = "Start Timer";
