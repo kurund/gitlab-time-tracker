@@ -358,6 +358,127 @@
         background: #fde8e8;
         color: #c62828;
       }
+
+      /* Views */
+      .view {
+        display: none;
+      }
+
+      .view.active {
+        display: block;
+      }
+
+      /* Settings */
+      .settings-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 16px;
+        background: white;
+        border-bottom: 1px solid #e5e5e5;
+      }
+
+      .back-btn {
+        background: none;
+        border: none;
+        padding: 4px;
+        cursor: pointer;
+        color: #666;
+        display: flex;
+        align-items: center;
+        border-radius: 4px;
+      }
+
+      .back-btn:hover {
+        background: #f0f0f0;
+        color: #1f75cb;
+      }
+
+      .back-btn svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      .settings-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #303030;
+      }
+
+      .settings-form {
+        padding: 16px;
+        background: white;
+      }
+
+      .form-group {
+        margin-bottom: 16px;
+      }
+
+      .form-group label {
+        display: block;
+        font-size: 12px;
+        font-weight: 500;
+        color: #666;
+        margin-bottom: 6px;
+      }
+
+      .form-group input {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 13px;
+        outline: none;
+      }
+
+      .form-group input:focus {
+        border-color: #1f75cb;
+        box-shadow: 0 0 0 2px rgba(31, 117, 203, 0.1);
+      }
+
+      .form-group .hint {
+        font-size: 11px;
+        color: #888;
+        margin-top: 4px;
+      }
+
+      .settings-actions {
+        margin-top: 20px;
+      }
+
+      .btn-save {
+        width: 100%;
+        background: #1f75cb;
+        color: white;
+        padding: 10px 16px;
+        font-size: 13px;
+        font-weight: 500;
+      }
+
+      .btn-save:hover {
+        background: #1a63a8;
+      }
+
+      .footer-btn {
+        background: none;
+        border: none;
+        font-size: 12px;
+        color: #666;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 0;
+      }
+
+      .footer-btn:hover {
+        color: #1f75cb;
+      }
+
+      .footer-btn svg {
+        width: 14px;
+        height: 14px;
+      }
     </style>
   </head>
   <body>
@@ -375,46 +496,74 @@
       <h1>GitLab Time Tracker</h1>
     </div>
 
-    <div class="timer-section">
-      <div id="timer-display">
-        <!-- Timer info will be injected here -->
+    <!-- Tasks View -->
+    <div id="tasks-view" class="view active">
+      <div class="timer-section">
+        <div id="timer-display">
+          <!-- Timer info will be injected here -->
+        </div>
       </div>
-    </div>
 
-    <div class="section">
-      <div class="search-box">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="8" />
-          <path d="M21 21l-4.35-4.35" />
-        </svg>
-        <input type="text" id="search-input" placeholder="Search tasks..." />
-        <button class="clear-btn" id="clear-search">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M18 6L6 18M6 6l12 12" />
+      <div class="section">
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8" />
+            <path d="M21 21l-4.35-4.35" />
           </svg>
+          <input type="text" id="search-input" placeholder="Search tasks..." />
+          <button class="clear-btn" id="clear-search">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <div class="section-header">Tasks</div>
+        <ul id="task-list" class="task-list">
+          <!-- Tasks will be listed here -->
+        </ul>
+      </div>
+
+      <div class="footer">
+        <button class="footer-btn" id="open-settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+          </svg>
+          Settings
         </button>
       </div>
-      <div class="section-header">Tasks</div>
-      <ul id="task-list" class="task-list">
-        <!-- Tasks will be listed here -->
-      </ul>
     </div>
 
-    <div class="footer">
-      <a href="settings.html" target="_blank">
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-        >
-          <circle cx="12" cy="12" r="3" />
-          <path
-            d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
-          />
-        </svg>
-        Settings
-      </a>
+    <!-- Settings View -->
+    <div id="settings-view" class="view">
+      <div class="settings-header">
+        <button class="back-btn" id="back-to-tasks">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 12H5M12 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <span class="settings-title">Settings</span>
+      </div>
+
+      <div class="settings-form">
+        <div class="form-group">
+          <label for="gitlab-url">GitLab URL</label>
+          <input type="text" id="gitlab-url" placeholder="https://gitlab.com" />
+          <div class="hint">Your GitLab instance URL (without trailing slash)</div>
+        </div>
+
+        <div class="form-group">
+          <label for="api-token">Personal Access Token</label>
+          <input type="password" id="api-token" placeholder="Enter your token" />
+          <div class="hint">Create one in GitLab → Settings → Access Tokens</div>
+        </div>
+
+        <div class="settings-actions">
+          <button class="btn btn-save" id="save-settings">Save Settings</button>
+        </div>
+
+        <div id="settings-message"></div>
+      </div>
     </div>
 
     <script src="popup.js"></script>

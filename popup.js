@@ -365,3 +365,67 @@ chrome.runtime.onMessage.addListener((request) => {
     showMessage(request.message, request.isError);
   }
 });
+
+// Settings view toggle
+const tasksView = document.getElementById("tasks-view");
+const settingsView = document.getElementById("settings-view");
+const openSettingsBtn = document.getElementById("open-settings");
+const backToTasksBtn = document.getElementById("back-to-tasks");
+const gitlabUrlInput = document.getElementById("gitlab-url");
+const apiTokenInput = document.getElementById("api-token");
+const saveSettingsBtn = document.getElementById("save-settings");
+const settingsMessage = document.getElementById("settings-message");
+
+function showSettingsView() {
+  tasksView.classList.remove("active");
+  settingsView.classList.add("active");
+  loadSettings();
+}
+
+function showTasksView() {
+  settingsView.classList.remove("active");
+  tasksView.classList.add("active");
+}
+
+function loadSettings() {
+  chrome.storage.sync.get(["gitlabUrl", "apiToken"], (result) => {
+    gitlabUrlInput.value = result.gitlabUrl || "";
+    apiTokenInput.value = result.apiToken || "";
+  });
+}
+
+function saveSettings() {
+  const newGitlabUrl = gitlabUrlInput.value.trim().replace(/\/$/, ""); // Remove trailing slash
+  const newApiToken = apiTokenInput.value.trim();
+
+  if (!newGitlabUrl) {
+    showSettingsMessage("Please enter a GitLab URL", true);
+    return;
+  }
+
+  chrome.storage.sync.set(
+    { gitlabUrl: newGitlabUrl, apiToken: newApiToken },
+    () => {
+      gitlabUrl = newGitlabUrl;
+      showSettingsMessage("Settings saved!");
+      setTimeout(() => {
+        showTasksView();
+      }, 1000);
+    }
+  );
+}
+
+function showSettingsMessage(message, isError = false) {
+  settingsMessage.textContent = message;
+  settingsMessage.className = `message ${isError ? "error" : "success"}`;
+  settingsMessage.style.marginTop = "12px";
+
+  setTimeout(() => {
+    settingsMessage.textContent = "";
+    settingsMessage.className = "";
+  }, 3000);
+}
+
+openSettingsBtn.addEventListener("click", showSettingsView);
+backToTasksBtn.addEventListener("click", showTasksView);
+saveSettingsBtn.addEventListener("click", saveSettings);
