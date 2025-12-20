@@ -74,31 +74,35 @@ function formatDuration(seconds) {
   return parts.join(" ");
 }
 
-function showNotification(title, message, isError = false) {
-  chrome.notifications.create({
-    type: "basic",
-    iconUrl: "images/icon128.png",
-    title: title,
-    message: message,
-    priority: isError ? 2 : 1,
+function broadcastMessage(message, isError = false) {
+  console.log(`Message: ${message} (error: ${isError})`);
+  chrome.tabs.query({}, (tabs) => {
+    for (const tab of tabs) {
+      chrome.tabs
+        .sendMessage(tab.id, {
+          action: "showMessage",
+          message: message,
+          isError: isError,
+        })
+        .catch(() => {});
+    }
   });
 }
 
 function postTimeToGitLab(issue, timeSpentInSeconds) {
   chrome.storage.sync.get(["gitlabUrl", "apiToken"], (result) => {
     if (!result.gitlabUrl || !result.apiToken) {
-      showNotification(
-        "Configuration Error",
-        "Please set your GitLab URL and API token in settings.",
-        true,
-      );
+      broadcastMessage("Please set your GitLab URL and API token in settings.", true);
       return;
     }
 
     const { gitlabUrl, apiToken } = result;
-    const { projectId, id: issueId, title } = issue;
+    const { projectId, id: issueId } = issue;
+    const title = issue.title || "Issue";
     const url = `${gitlabUrl}/api/v4/projects/${projectId}/issues/${issueId}/add_spent_time`;
     const duration = formatDuration(timeSpentInSeconds);
+
+    console.log(`Posting time to GitLab: ${duration} for issue #${issueId}`);
 
     fetch(url, {
       method: "POST",
@@ -108,28 +112,25 @@ function postTimeToGitLab(issue, timeSpentInSeconds) {
       },
       body: JSON.stringify({ duration }),
     })
-      .then((response) => {
-        if (!response.ok) {
-          return response.json().then((data) => {
-            throw new Error(data.message || `HTTP ${response.status}`);
-          });
+      .then(async (response) => {
+        let data;
+        try {
+          data = await response.json();
+        } catch (e) {
+          data = {};
         }
-        return response.json();
-      })
-      .then((data) => {
+
+        if (!response.ok) {
+          const errorMsg = data.message || data.error || `HTTP ${response.status}`;
+          throw new Error(errorMsg);
+        }
+
         console.log("Time added successfully:", data);
-        showNotification(
-          "Time Logged",
-          `${duration} added to #${issueId}: ${title}`,
-        );
+        broadcastMessage(`${duration} logged to #${issueId}`);
       })
       .catch((error) => {
         console.error("Error adding time:", error);
-        showNotification(
-          "Failed to Log Time",
-          `Could not log time to #${issueId}: ${error.message}`,
-          true,
-        );
+        broadcastMessage(`Failed to log time: ${error.message}`, true);
       });
   });
 }

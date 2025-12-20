@@ -31,6 +31,33 @@ function getIssueUrl(issue) {
   return `${gitlabUrl}/-/projects/${issue.projectId}/issues/${issue.id}`;
 }
 
+function showMessage(message, isError = false) {
+  // Remove existing message
+  const existing = document.getElementById("popup-message");
+  if (existing) existing.remove();
+
+  const msgEl = document.createElement("div");
+  msgEl.id = "popup-message";
+  msgEl.textContent = message;
+  msgEl.style.cssText = `
+    padding: 8px 12px;
+    margin: 0 0 8px 0;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    background: ${isError ? "#fde8e8" : "#e8f5e9"};
+    color: ${isError ? "#c62828" : "#2e7d32"};
+    text-align: center;
+  `;
+
+  timerDisplay.parentNode.insertBefore(msgEl, timerDisplay);
+
+  // Auto-remove after 5 seconds
+  setTimeout(() => {
+    if (msgEl.parentNode) msgEl.remove();
+  }, 5000);
+}
+
 function updateTimerDisplay(timerState) {
   if (timerState && timerState.isRunning) {
     if (timerInterval) clearInterval(timerInterval);
@@ -223,5 +250,12 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
     if (changes.favorites) {
       loadFavorites();
     }
+  }
+});
+
+// Listen for messages from background script
+chrome.runtime.onMessage.addListener((request) => {
+  if (request.action === "showMessage") {
+    showMessage(request.message, request.isError);
   }
 });
