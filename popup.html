@@ -522,18 +522,29 @@
 
       <div class="section">
         <div class="search-box">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
             <circle cx="11" cy="11" r="8" />
             <path d="M21 21l-4.35-4.35" />
           </svg>
-          <input type="text" id="search-input" placeholder="Search tasks..." />
+          <input type="text" id="search-input" placeholder="Search issues..." />
           <button class="clear-btn" id="clear-search">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+            <svg
+              viewBox="0 0 24 24"
+              width="14"
+              height="14"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <path d="M18 6L6 18M6 6l12 12" />
             </svg>
           </button>
         </div>
-        <div class="section-header">Tasks</div>
         <ul id="task-list" class="task-list">
           <!-- Tasks will be listed here -->
         </ul>
@@ -541,9 +552,16 @@
 
       <div class="footer">
         <button class="footer-btn" id="open-settings">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
             <circle cx="12" cy="12" r="3" />
-            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+            <path
+              d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+            />
           </svg>
           Settings
         </button>
@@ -554,7 +572,12 @@
     <div id="settings-view" class="view">
       <div class="settings-header">
         <button class="back-btn" id="back-to-tasks">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
         </button>
@@ -565,13 +588,21 @@
         <div class="form-group">
           <label for="gitlab-url">GitLab URL</label>
           <input type="text" id="gitlab-url" placeholder="https://gitlab.com" />
-          <div class="hint">Your GitLab instance URL (without trailing slash)</div>
+          <div class="hint">
+            Your GitLab instance URL (without trailing slash)
+          </div>
         </div>
 
         <div class="form-group">
           <label for="api-token">Personal Access Token</label>
-          <input type="password" id="api-token" placeholder="Enter your token" />
-          <div class="hint">Create one in GitLab → Settings → Access Tokens</div>
+          <input
+            type="password"
+            id="api-token"
+            placeholder="Enter your token"
+          />
+          <div class="hint">
+            Create one in GitLab → Settings → Access Tokens
+          </div>
         </div>
 
         <div class="settings-actions">

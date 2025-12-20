@@ -107,7 +107,10 @@ function broadcastMessage(message, isError = false) {
 function postTimeToGitLab(issue, timeSpentInSeconds) {
   chrome.storage.sync.get(["gitlabUrl", "apiToken"], (result) => {
     if (!result.gitlabUrl || !result.apiToken) {
-      broadcastMessage("Please set your GitLab URL and API token in settings.", true);
+      broadcastMessage(
+        "Please set your GitLab URL and API token in settings.",
+        true,
+      );
       return;
     }
 
@@ -136,7 +139,8 @@ function postTimeToGitLab(issue, timeSpentInSeconds) {
         }
 
         if (!response.ok) {
-          const errorMsg = data.message || data.error || `HTTP ${response.status}`;
+          const errorMsg =
+            data.message || data.error || `HTTP ${response.status}`;
           throw new Error(errorMsg);
         }
 
@@ -209,7 +213,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const { issue, duration } = request;
     chrome.storage.sync.get(["gitlabUrl", "apiToken"], (result) => {
       if (!result.gitlabUrl || !result.apiToken) {
-        sendResponse({ success: false, error: "Please configure GitLab settings" });
+        sendResponse({
+          success: false,
+          error: "Please configure GitLab settings",
+        });
         return;
       }
 
@@ -234,7 +241,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           }
 
           if (!response.ok) {
-            const errorMsg = data.message || data.error || `HTTP ${response.status}`;
+            const errorMsg =
+              data.message || data.error || `HTTP ${response.status}`;
             sendResponse({ success: false, error: errorMsg });
             return;
           }

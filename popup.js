@@ -231,7 +231,7 @@ function toggleTimeEntry(li, task) {
           submitBtn.disabled = false;
           submitBtn.textContent = "Log";
         }
-      }
+      },
     );
   }
 
@@ -250,7 +250,7 @@ function deleteTask(task) {
     const taskKey = `${task.projectId}-${task.id}`;
 
     recentTasks = recentTasks.filter(
-      (t) => `${t.projectId}-${t.id}` !== taskKey
+      (t) => `${t.projectId}-${t.id}` !== taskKey,
     );
     favorites = favorites.filter((t) => `${t.projectId}-${t.id}` !== taskKey);
 
@@ -267,7 +267,7 @@ function toggleFavorite(task, add) {
 
     if (add) {
       const exists = favorites.some(
-        (f) => `${f.projectId}-${f.id}` === taskKey
+        (f) => `${f.projectId}-${f.id}` === taskKey,
       );
       if (!exists) {
         favorites.unshift(task);
@@ -323,7 +323,7 @@ function filterTasks(query) {
   const q = query.toLowerCase();
   const filtered = allTasks.filter(
     (task) =>
-      task.title.toLowerCase().includes(q) || task.id.toString().includes(q)
+      task.title.toLowerCase().includes(q) || task.id.toString().includes(q),
   );
   renderTasks(filtered);
 
@@ -352,7 +352,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // Load timer state
   chrome.runtime.sendMessage({ action: "getTimerState" }, (response) => {
     if (chrome.runtime.lastError) {
-      timerDisplay.innerHTML = '<div class="no-timer">Error loading timer</div>';
+      timerDisplay.innerHTML =
+        '<div class="no-timer">Error loading timer</div>';
       return;
     }
     updateTimerDisplay(response);
@@ -423,7 +424,7 @@ function saveSettings() {
       setTimeout(() => {
         showTasksView();
       }, 1000);
-    }
+    },
   );
 }
 
