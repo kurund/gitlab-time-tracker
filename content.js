@@ -1,18 +1,11 @@
 chrome.storage.sync.get(["gitlabUrl"], (result) => {
   const gitlabUrl = result.gitlabUrl;
-  console.log("GitLab URL from settings:", gitlabUrl);
-  console.log("Current URL:", window.location.href);
-  console.log(
-    "Does current URL start with GitLab URL?",
-    window.location.href.startsWith(gitlabUrl),
-  );
 
   if (gitlabUrl && window.location.href.startsWith(gitlabUrl)) {
     function getIssueDetails() {
       const isIssuePage =
         document.body.dataset.page === "projects:issues:show" ||
         document.querySelector('.breadcrumbs-list li a[href$="/issues"]');
-      console.log("Is this an issue page?", isIssuePage);
 
       if (!isIssuePage) {
         return null;
@@ -35,10 +28,6 @@ chrome.storage.sync.get(["gitlabUrl"], (result) => {
 
       const projectId = document.body.dataset.projectId;
 
-      console.log("Title:", title);
-      console.log("Issue ID:", issueId);
-      console.log("Project ID:", projectId);
-
       if (title && issueId) {
         const issueDetails = {
           title: title,
@@ -49,7 +38,6 @@ chrome.storage.sync.get(["gitlabUrl"], (result) => {
         console.log("Issue details found:", issueDetails);
         return issueDetails;
       }
-      console.log("Could not find all issue details.");
       return null;
     }
 
@@ -114,7 +102,6 @@ chrome.storage.sync.get(["gitlabUrl"], (result) => {
         const titleElement = document.querySelector(
           'h1[data-testid="work-item-title"]',
         );
-        console.log("Title element for button injection:", titleElement);
 
         if (titleElement) {
           const button = document.createElement("button");
