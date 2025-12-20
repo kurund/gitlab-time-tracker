@@ -3,7 +3,7 @@
   "name": "GitLab Time Tracker",
   "version": "1.0",
   "description": "A Chrome extension for tracking time spent on GitLab issues.",
-  "permissions": ["storage", "webNavigation", "tabs"],
+  "permissions": ["storage", "webNavigation", "tabs", "notifications"],
   "host_permissions": ["<all_urls>"],
   "background": {
     "service_worker": "background.js"

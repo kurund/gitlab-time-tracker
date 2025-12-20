@@ -61,47 +61,97 @@ function addToRecentTasks(issue, timeSpent) {
   });
 }
 
+function formatDuration(seconds) {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+
+  const parts = [];
+  if (hours > 0) parts.push(`${hours}h`);
+  if (minutes > 0) parts.push(`${minutes}m`);
+  if (secs > 0 || parts.length === 0) parts.push(`${secs}s`);
+
+  return parts.join(" ");
+}
+
+function showNotification(title, message, isError = false) {
+  chrome.notifications.create({
+    type: "basic",
+    iconUrl: "images/icon128.png",
+    title: title,
+    message: message,
+    priority: isError ? 2 : 1,
+  });
+}
+
 function postTimeToGitLab(issue, timeSpentInSeconds) {
   chrome.storage.sync.get(["gitlabUrl", "apiToken"], (result) => {
-    if (result.gitlabUrl && result.apiToken) {
-      const { gitlabUrl, apiToken } = result;
-      const { projectId, id: issueId } = issue;
-      const url = `${gitlabUrl}/api/v4/projects/${projectId}/issues/${issueId}/add_spent_time`;
-
-      const hours = Math.floor(timeSpentInSeconds / 3600);
-      const minutes = Math.floor((timeSpentInSeconds % 3600) / 60);
-      const seconds = timeSpentInSeconds % 60;
-      const duration = `${hours}h ${minutes}m ${seconds}s`;
-
-      fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "PRIVATE-TOKEN": apiToken,
-        },
-        body: JSON.stringify({ duration }),
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          console.log("Time added successfully:", data);
-        })
-        .catch((error) => {
-          console.error("Error adding time:", error);
-        });
+    if (!result.gitlabUrl || !result.apiToken) {
+      showNotification(
+        "Configuration Error",
+        "Please set your GitLab URL and API token in settings.",
+        true,
+      );
+      return;
     }
+
+    const { gitlabUrl, apiToken } = result;
+    const { projectId, id: issueId, title } = issue;
+    const url = `${gitlabUrl}/api/v4/projects/${projectId}/issues/${issueId}/add_spent_time`;
+    const duration = formatDuration(timeSpentInSeconds);
+
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "PRIVATE-TOKEN": apiToken,
+      },
+      body: JSON.stringify({ duration }),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          return response.json().then((data) => {
+            throw new Error(data.message || `HTTP ${response.status}`);
+          });
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log("Time added successfully:", data);
+        showNotification(
+          "Time Logged",
+          `${duration} added to #${issueId}: ${title}`,
+        );
+      })
+      .catch((error) => {
+        console.error("Error adding time:", error);
+        showNotification(
+          "Failed to Log Time",
+          `Could not log time to #${issueId}: ${error.message}`,
+          true,
+        );
+      });
   });
 }
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "startTimer") {
-    if (!timerState.isRunning) {
-      timerState.isRunning = true;
-      timerState.issue = request.issue;
-      timerState.startTime = Date.now();
-      timerState.timerId = setInterval(updateBadge, 1000);
-      chrome.storage.local.set({ timerState });
-      broadcastTimerState();
+    // Stop current timer if running
+    if (timerState.isRunning) {
+      clearInterval(timerState.timerId);
+      const timeSpent = Math.round((Date.now() - timerState.startTime) / 1000);
+      postTimeToGitLab(timerState.issue, timeSpent);
+      addToRecentTasks(timerState.issue, timeSpent);
     }
+
+    // Start new timer
+    timerState.isRunning = true;
+    timerState.issue = request.issue;
+    timerState.startTime = Date.now();
+    timerState.timerId = setInterval(updateBadge, 1000);
+    chrome.storage.local.set({ timerState });
+    addToRecentTasks(request.issue, 0);
+    broadcastTimerState();
     sendResponse({ status: "Timer started" });
   } else if (request.action === "stopTimer") {
     if (timerState.isRunning) {
