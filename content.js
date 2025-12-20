@@ -3,23 +3,36 @@ chrome.storage.sync.get(["gitlabUrl"], (result) => {
 
   if (gitlabUrl && window.location.href.startsWith(gitlabUrl)) {
     function getIssueDetails() {
+      // Check if we're on an issue page
       const isIssuePage =
         document.body.dataset.page === "projects:issues:show" ||
-        document.querySelector('.breadcrumbs-list li a[href$="/issues"]');
+        document.querySelector('.breadcrumbs-list li a[href$="/issues"]') ||
+        window.location.pathname.includes("/issues/");
 
       if (!isIssuePage) {
         return null;
       }
 
-      let titleElement = document.querySelector(
+      // Try multiple selectors to find the title
+      const titleSelectors = [
         'h1[data-testid="work-item-title"] span',
-      );
-      let title = null;
+        'h1[data-testid="issue-title"] span',
+        'h1[data-testid="work-item-title"]',
+        'h1[data-testid="issue-title"]',
+        ".issue-details h1.title",
+        ".detail-page-header h1",
+      ];
 
-      if (titleElement) {
-        title = titleElement.innerText;
+      let title = null;
+      for (const selector of titleSelectors) {
+        const element = document.querySelector(selector);
+        if (element) {
+          title = element.innerText?.trim();
+          if (title) break;
+        }
       }
 
+      // Get issue ID from URL
       let issueId = null;
       const match = window.location.pathname.match(/issues\/(\d+)/);
       if (match) {
@@ -98,10 +111,19 @@ chrome.storage.sync.get(["gitlabUrl"], (result) => {
         issueDetails &&
         !document.getElementById("gitlab-timer-start-button")
       ) {
-        // Try to find the title element and inject button next to it
-        const titleElement = document.querySelector(
+        // Try multiple selectors to find the title element
+        const titleSelectors = [
           'h1[data-testid="work-item-title"]',
-        );
+          'h1[data-testid="issue-title"]',
+          ".issue-details h1.title",
+          ".detail-page-header h1",
+        ];
+
+        let titleElement = null;
+        for (const selector of titleSelectors) {
+          titleElement = document.querySelector(selector);
+          if (titleElement) break;
+        }
 
         if (titleElement) {
           const button = document.createElement("button");
@@ -126,7 +148,6 @@ chrome.storage.sync.get(["gitlabUrl"], (result) => {
           } else {
             titleElement.appendChild(button);
           }
-          console.log("Start Timer button injected.");
         }
       }
     }
