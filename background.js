@@ -28,7 +28,7 @@ function updateBadge() {
     }
 
     chrome.action.setBadgeText({ text });
-    chrome.action.setBadgeBackgroundColor({ color: "#1f75cb" });
+    chrome.action.setBadgeBackgroundColor({ color: "#FC6D26" });
   } else {
     chrome.action.setBadgeText({ text: "" });
   }

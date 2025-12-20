@@ -1,11 +1,11 @@
 <svg role="img" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
   <title>GitLab Time Tracker</title>
-  <g fill="none" stroke="#1f75cb" stroke-width="8">
-    <circle cx="50" cy="55" r="40"/>
+  <g fill="none" stroke="#FC6D26" stroke-width="9">
+    <circle cx="50" cy="52" r="44"/>
     <g stroke-linecap="round">
-      <line x1="40" y1="8" x2="60" y2="8"/>
-      <line x1="50" y1="8" x2="50" y2="15"/>
+      <line x1="38" y1="2" x2="62" y2="2"/>
+      <line x1="50" y1="2" x2="50" y2="10"/>
     </g>
   </g>
-  <polygon points="42,45 68,55 42,65" fill="#1f75cb"/>
+  <polygon points="40,42 70,52 40,62" fill="#ffffff"/>
 </svg>

@@ -64,8 +64,8 @@ chrome.storage.sync.get(["gitlabUrl"], (result) => {
       if (isRunning) {
         button.innerHTML = stopIcon;
         button.title = "Stop Timer";
-        button.style.backgroundColor = "#dc3545";
-        button.style.borderColor = "#dc3545";
+        button.style.backgroundColor = "#554488";
+        button.style.borderColor = "#554488";
         button.style.color = "#fff";
         button.onclick = () => {
           safeSendMessage({ action: "stopTimer" }, () => {
@@ -75,8 +75,8 @@ chrome.storage.sync.get(["gitlabUrl"], (result) => {
       } else {
         button.innerHTML = playIcon;
         button.title = "Start Timer";
-        button.style.backgroundColor = "#1f75cb";
-        button.style.borderColor = "#1f75cb";
+        button.style.backgroundColor = "#FC6D26";
+        button.style.borderColor = "#FC6D26";
         button.style.color = "#fff";
         button.onclick = () => {
           safeSendMessage(
