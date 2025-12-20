@@ -10,10 +10,25 @@ let timerState = {
 function updateBadge() {
   if (timerState.isRunning) {
     const elapsed = Math.floor((Date.now() - timerState.startTime) / 1000);
-    const minutes = Math.floor(elapsed / 60);
+    const totalMinutes = Math.floor(elapsed / 60);
     const seconds = elapsed % 60;
-    const text = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+
+    let text;
+    if (hours > 0) {
+      // 1h10, 2h30, etc.
+      text = `${hours}h${minutes}`;
+    } else if (totalMinutes > 0) {
+      // 1m, 10m, 45m, etc.
+      text = `${totalMinutes}m`;
+    } else {
+      // 1s, 30s, etc.
+      text = `${seconds}s`;
+    }
+
     chrome.action.setBadgeText({ text });
+    chrome.action.setBadgeBackgroundColor({ color: "#1f75cb" });
   } else {
     chrome.action.setBadgeText({ text: "" });
   }
