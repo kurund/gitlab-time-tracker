@@ -310,7 +310,7 @@ function renderTasks(tasks) {
   taskList.innerHTML = "";
 
   if (tasks.length === 0) {
-    taskList.innerHTML = '<li class="empty-state">No tasks found</li>';
+    taskList.innerHTML = '<li class="empty-state">No issues found.</li>';
     return;
   }
 
