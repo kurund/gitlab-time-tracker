@@ -172,6 +172,21 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       broadcastTimerState();
     }
     sendResponse({ status: "Timer stopped" });
+  } else if (request.action === "cancelTimer") {
+    if (timerState.isRunning) {
+      clearInterval(timerState.timerId);
+      const issue = timerState.issue;
+
+      timerState.isRunning = false;
+      timerState.issue = null;
+      timerState.startTime = null;
+      timerState.timerId = null;
+      chrome.storage.local.set({ timerState });
+      updateBadge();
+      broadcastTimerState();
+      broadcastMessage(`Timer cancelled for #${issue.id}`);
+    }
+    sendResponse({ status: "Timer cancelled" });
   } else if (request.action === "getTimerState") {
     sendResponse(timerState);
   } else if (request.action === "logTime") {

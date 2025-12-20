@@ -67,7 +67,10 @@ function updateTimerDisplay(timerState) {
           <div class="timer-time">${formatTime(elapsed)}</div>
           <div class="timer-actions">
             <button id="stop-button" class="btn btn-stop">
-              ${stopIcon} Stop Timer
+              ${stopIcon} Stop
+            </button>
+            <button id="cancel-button" class="cancel-link">
+              Cancel
             </button>
           </div>
         </div>
@@ -77,6 +80,12 @@ function updateTimerDisplay(timerState) {
           if (timerInterval) clearInterval(timerInterval);
           updateTimerDisplay(null);
           loadTasks();
+        });
+      };
+      document.getElementById("cancel-button").onclick = () => {
+        chrome.runtime.sendMessage({ action: "cancelTimer" }, () => {
+          if (timerInterval) clearInterval(timerInterval);
+          updateTimerDisplay(null);
         });
       };
     };
