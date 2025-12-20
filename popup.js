@@ -168,8 +168,8 @@ function createTaskItem(task, isFavorite) {
   deleteBtn.title = "Remove from list";
   deleteBtn.onclick = () => deleteTask(task);
 
-  taskActions.appendChild(addTimeBtn);
   taskActions.appendChild(playBtn);
+  taskActions.appendChild(addTimeBtn);
   taskActions.appendChild(deleteBtn);
 
   taskRow.appendChild(favBtn);
