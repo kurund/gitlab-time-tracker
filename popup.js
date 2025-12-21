@@ -411,6 +411,8 @@ const gitlabUrlInput = document.getElementById("gitlab-url");
 const apiTokenInput = document.getElementById("api-token");
 const saveSettingsBtn = document.getElementById("save-settings");
 const settingsMessage = document.getElementById("settings-message");
+const permissionStatus = document.getElementById("permission-status");
+const requestPermissionBtn = document.getElementById("request-permission-btn");
 
 function showSettingsView() {
   tasksView.classList.remove("active");
@@ -427,6 +429,50 @@ function loadSettings() {
   chrome.storage.local.get(["gitlabUrl", "apiToken"], (result) => {
     gitlabUrlInput.value = result.gitlabUrl || "";
     apiTokenInput.value = result.apiToken || "";
+    updatePermissionStatus();
+  });
+}
+
+function updatePermissionStatus() {
+  const url = gitlabUrlInput.value.trim();
+  if (!url) {
+    permissionStatus.textContent = "Enter a GitLab URL to request permission.";
+    permissionStatus.style.color = "#888";
+    requestPermissionBtn.disabled = true;
+    return;
+  }
+
+  const origin = new URL(url).origin + "/*";
+  chrome.permissions.contains({ origins: [origin] }, (granted) => {
+    if (granted) {
+      permissionStatus.textContent = `Permission granted for ${url}`;
+      permissionStatus.style.color = "#2e7d32";
+      requestPermissionBtn.textContent = "Permission Granted";
+      requestPermissionBtn.disabled = true;
+    } else {
+      permissionStatus.textContent = `Permission not granted for ${url}`;
+      permissionStatus.style.color = "#c62828";
+      requestPermissionBtn.textContent = "Request Permission";
+      requestPermissionBtn.disabled = false;
+    }
+  });
+}
+
+function requestPermission() {
+  const url = gitlabUrlInput.value.trim();
+  if (!url) {
+    showSettingsMessage("Please enter a GitLab URL first.", true);
+    return;
+  }
+
+  const origin = new URL(url).origin + "/*";
+  chrome.permissions.request({ origins: [origin] }, (granted) => {
+    if (granted) {
+      showSettingsMessage("Permission granted!");
+    } else {
+      showSettingsMessage("Permission was not granted.", true);
+    }
+    updatePermissionStatus();
   });
 }
 
@@ -444,8 +490,10 @@ function saveSettings() {
     () => {
       gitlabUrl = newGitlabUrl;
       showSettingsMessage("Settings saved!");
+      updatePermissionStatus();
       setTimeout(() => {
-        showTasksView();
+        // Do not automatically close, let user request permission
+        // showTasksView();
       }, 1000);
     },
   );
@@ -465,3 +513,5 @@ function showSettingsMessage(message, isError = false) {
 openSettingsBtn.addEventListener("click", showSettingsView);
 backToTasksBtn.addEventListener("click", showTasksView);
 saveSettingsBtn.addEventListener("click", saveSettings);
+gitlabUrlInput.addEventListener("input", updatePermissionStatus);
+requestPermissionBtn.addEventListener("click", requestPermission);

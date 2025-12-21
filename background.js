@@ -35,18 +35,22 @@ function updateBadge() {
 }
 
 function broadcastTimerState() {
-  chrome.tabs.query({}, (tabs) => {
-    for (const tab of tabs) {
-      chrome.tabs
-        .sendMessage(tab.id, {
-          action: "timerStateChanged",
-          timerState: {
-            isRunning: timerState.isRunning,
-            issue: timerState.issue,
-          },
-        })
-        .catch(() => {});
-    }
+  chrome.storage.local.get("gitlabUrl", (result) => {
+    if (!result.gitlabUrl) return;
+
+    chrome.tabs.query({ url: `${result.gitlabUrl}/*` }, (tabs) => {
+      for (const tab of tabs) {
+        chrome.tabs
+          .sendMessage(tab.id, {
+            action: "timerStateChanged",
+            timerState: {
+              isRunning: timerState.isRunning,
+              issue: timerState.issue,
+            },
+          })
+          .catch(() => {});
+      }
+    });
   });
 }
 
@@ -90,17 +94,20 @@ function formatDuration(seconds) {
 }
 
 function broadcastMessage(message, isError = false) {
-  console.log(`Message: ${message} (error: ${isError})`);
-  chrome.tabs.query({}, (tabs) => {
-    for (const tab of tabs) {
-      chrome.tabs
-        .sendMessage(tab.id, {
-          action: "showMessage",
-          message: message,
-          isError: isError,
-        })
-        .catch(() => {});
-    }
+  chrome.storage.local.get("gitlabUrl", (result) => {
+    if (!result.gitlabUrl) return;
+
+    chrome.tabs.query({ url: `${result.gitlabUrl}/*` }, (tabs) => {
+      for (const tab of tabs) {
+        chrome.tabs
+          .sendMessage(tab.id, {
+            action: "showMessage",
+            message: message,
+            isError: isError,
+          })
+          .catch(() => {});
+      }
+    });
   });
 }
 
@@ -119,8 +126,6 @@ function postTimeToGitLab(issue, timeSpentInSeconds) {
     const title = issue.title || "Issue";
     const url = `${gitlabUrl}/api/v4/projects/${projectId}/issues/${issueId}/add_spent_time`;
     const duration = formatDuration(timeSpentInSeconds);
-
-    console.log(`Posting time to GitLab: ${duration} for issue #${issueId}`);
 
     fetch(url, {
       method: "POST",
@@ -144,11 +149,9 @@ function postTimeToGitLab(issue, timeSpentInSeconds) {
           throw new Error(errorMsg);
         }
 
-        console.log("Time added successfully:", data);
         broadcastMessage(`${duration} logged to #${issueId}`);
       })
       .catch((error) => {
-        console.error("Error adding time:", error);
         broadcastMessage(`Failed to log time: ${error.message}`, true);
       });
   });
@@ -247,12 +250,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             return;
           }
 
-          console.log("Time logged manually:", data);
           addToRecentTasks(issue, 0);
           sendResponse({ success: true });
         })
         .catch((error) => {
-          console.error("Error logging time:", error);
           sendResponse({ success: false, error: error.message });
         });
     });
@@ -273,4 +274,90 @@ chrome.runtime.onStartup.addListener(() => {
       }
     }
   });
+  registerContentScripts();
+  injectContentScriptForGrantedOrigins();
+});
+
+// Also inject on install/update
+chrome.runtime.onInstalled.addListener(() => {
+  registerContentScripts();
+  injectContentScriptForGrantedOrigins();
+});
+
+chrome.permissions.onAdded.addListener((permissions) => {
+  if (permissions.origins && permissions.origins.length > 0) {
+    registerContentScripts();
+    injectContentScriptForGrantedOrigins();
+  }
+});
+
+async function registerContentScripts() {
+  // Unregister existing scripts first
+  try {
+    await chrome.scripting.unregisterContentScripts({
+      ids: ["gitlab-time-tracker"],
+    });
+  } catch (e) {
+    // Ignore if not registered
+  }
+
+  // Get all granted origins
+  chrome.permissions.getAll(async (permissions) => {
+    const origins = permissions.origins || [];
+    if (origins.length === 0) return;
+
+    try {
+      await chrome.scripting.registerContentScripts([
+        {
+          id: "gitlab-time-tracker",
+          matches: origins,
+          js: ["content.js"],
+          runAt: "document_idle",
+        },
+      ]);
+    } catch (err) {
+      // Ignore registration errors
+    }
+  });
+}
+
+function injectContentScriptForGrantedOrigins() {
+  chrome.permissions.getAll((permissions) => {
+    const origins = permissions.origins || [];
+    for (const origin of origins) {
+      chrome.tabs.query({ url: origin }, (tabs) => {
+        for (const tab of tabs) {
+          chrome.scripting
+            .executeScript({
+              target: { tabId: tab.id },
+              files: ["content.js"],
+            })
+            .catch(() => {});
+        }
+      });
+    }
+  });
+}
+
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (
+    (changeInfo.status === "loading" || changeInfo.status === "complete") &&
+    tab.url
+  ) {
+    chrome.permissions.getAll((permissions) => {
+      const origins = permissions.origins || [];
+      for (const origin of origins) {
+        const originPrefix = origin.replace(/\*$/, "");
+        if (tab.url.startsWith(originPrefix)) {
+          chrome.scripting
+            .executeScript({
+              target: { tabId: tabId },
+              files: ["content.js"],
+            })
+            .catch(() => {});
+          break;
+        }
+      }
+    });
+  }
 });
