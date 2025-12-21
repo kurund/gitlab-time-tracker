@@ -311,19 +311,31 @@ function loadTasks() {
     const favorites = result.favorites || [];
     const favoriteIds = new Set(favorites.map((f) => `${f.projectId}-${f.id}`));
 
-    // Combine: favorites first, then recent (excluding duplicates)
-    const combined = [...favorites];
+    // Merge favorites with their latest timestamps from recentTasks
+    const taskMap = new Map();
+
+    // Add all recent tasks to map
     for (const task of recentTasks) {
       const taskKey = `${task.projectId}-${task.id}`;
-      if (!favoriteIds.has(taskKey)) {
-        combined.push(task);
+      taskMap.set(taskKey, { ...task, isFavorite: favoriteIds.has(taskKey) });
+    }
+
+    // Add favorites that aren't in recent tasks
+    for (const fav of favorites) {
+      const taskKey = `${fav.projectId}-${fav.id}`;
+      if (!taskMap.has(taskKey)) {
+        taskMap.set(taskKey, { ...fav, isFavorite: true });
       }
     }
 
-    allTasks = combined.map((task) => ({
-      ...task,
-      isFavorite: favoriteIds.has(`${task.projectId}-${task.id}`),
-    }));
+    // Convert to array and sort: favorites first (sorted by time), then others (sorted by time)
+    allTasks = Array.from(taskMap.values()).sort((a, b) => {
+      // Favorites first
+      if (a.isFavorite && !b.isFavorite) return -1;
+      if (!a.isFavorite && b.isFavorite) return 1;
+      // Within same group, sort by lastTracked (most recent first)
+      return (b.lastTracked || 0) - (a.lastTracked || 0);
+    });
 
     renderTasks(allTasks);
   });
