@@ -7,31 +7,42 @@ A Chrome extension that helps you track time spent on GitLab issues with automat
 ### Timer on GitLab Issues
 
 - **Play/Stop Button:** A timer button appears next to the issue title on GitLab issue pages
-- **Visual Indicators:** Play icon (blue) to start, Stop icon (red) when running
-- **Auto-Switch:** Starting a timer on a new issue automatically stops the previous timer and logs the time
+- **Visual Indicators:** Play icon (orange) to start, Stop icon (purple) when running
+- **Cancel Option:** Cancel a timer without logging time
+- **Auto-Switch:** Starting a timer on a new issue automatically stops and logs the previous one
 - **State Persistence:** Timer state is preserved across page refreshes
 
 ### Live Timer Display
 
-- **Badge Timer:** The extension icon shows a live, ticking timer (MM:SS format)
-- **Popup Timer:** Large timer display in the popup showing elapsed time
+- **Badge Timer:** The extension icon shows elapsed time (1s → 10m → 1h10)
+- **Popup Timer:** Large timer display showing elapsed time (e.g., "5m 30s", "1h 20m")
 
 ### Task Management
 
-- **Combined Task List:** Single list showing all tracked issues with favorites pinned at the top
+- **Combined Task List:** All tracked issues with favorites pinned at the top
+- **Time-Sorted:** Both favorites and regular tasks sorted by most recent
 - **Quick Search:** Filter tasks by title or issue ID
 - **Favorites:** Star/unstar tasks to keep them easily accessible
 - **Delete:** Remove tasks from the list
 
 ### Time Logging
 
-- **Automatic Logging:** When you stop a timer, time is automatically posted to GitLab via the API
-- **Manual Time Entry:** Click the + button on any task to manually log time (e.g., "1h 30m", "45m")
-- **Inline Messages:** Success/error messages appear next to the timer button on the issue page
+- **Automatic Logging:** Time is posted to GitLab when you stop the timer
+- **Minimum 1 Minute:** Times under 1 minute are not logged
+- **Rounded to Minutes:** Seconds are ignored (e.g., 8m 45s logs as "8m")
+- **Manual Time Entry:** Click + to manually log time (e.g., "1h 30m", "45m")
+- **Inline Messages:** Success/error messages appear next to the timer button
+
+### Security
+
+- **Optional Permissions:** Extension only requests access to your GitLab URL when you grant it
+- **Local Storage:** Credentials stored locally, not synced across devices
+- **Minimal Permissions:** Only requests necessary permissions
 
 ### Settings
 
-- **Embedded Settings:** Configure GitLab URL and API token directly in the popup
+- **Embedded Settings:** Configure GitLab URL and API token in the popup
+- **Permission Request:** Explicitly grant access to your GitLab instance
 
 ## Installation
 
@@ -53,10 +64,11 @@ A Chrome extension that helps you track time spent on GitLab issues with automat
 
 5. **Configure Settings:**
    - Click the extension icon
-   - Click the Settings button (gear icon)
+   - Click Settings (gear icon)
    - Enter your GitLab URL (e.g., `https://gitlab.com`)
    - Enter your Personal Access Token
-   - Click "Save Settings"
+   - Click "Request Permission" to grant access
+   - Click "Save"
 
 ### Creating a GitLab Personal Access Token
 
@@ -70,32 +82,37 @@ A Chrome extension that helps you track time spent on GitLab issues with automat
 ### Starting a Timer
 
 1. Navigate to any GitLab issue page
-2. Click the blue play button next to the issue title
+2. Click the orange play button next to the issue title
 3. The timer starts and appears in the extension badge
 
 ### Stopping a Timer
 
-You can stop a timer in two ways:
+- Click the purple stop button on the issue page, or
+- Click "Stop" in the extension popup
 
-- Click the red stop button on the GitLab issue page
-- Click the extension icon and use the "Stop Timer" button in the popup
+Time is automatically logged to GitLab (if >= 1 minute).
 
-When stopped, the time is automatically logged to the GitLab issue.
+### Canceling a Timer
+
+- Click "Cancel" next to the stop button on the issue page, or
+- Click "Cancel" in the extension popup
+
+Timer stops without logging time.
 
 ### Manual Time Entry
 
-1. Click the extension icon to open the popup
+1. Open the extension popup
 2. Find the task in the list
 3. Click the + button
-4. Enter the time (e.g., "2h", "30m", "1h 30m")
-5. Click "Log" to submit
+4. Enter time (e.g., "2h", "30m", "1h 30m")
+5. Click "Log"
 
 ### Managing Tasks
 
-- **Star a task:** Click the star icon to add to favorites (appears at top of list)
-- **Search:** Type in the search box to filter tasks
-- **Delete:** Click the X button to remove a task from the list
-- **Open in GitLab:** Click the task title to open the issue in a new tab
+- **Star:** Click star icon to favorite (appears at top)
+- **Search:** Type to filter tasks
+- **Delete:** Click × to remove from list
+- **Open:** Click task title to open in GitLab
 
 ## File Structure
 
@@ -107,6 +124,7 @@ gitlab-time-tracker/
 ├── popup.html         # Popup UI structure and styles
 ├── popup.js           # Popup functionality
 └── images/            # Extension icons
+    ├── icon.svg
     ├── icon16.png
     ├── icon48.png
     └── icon128.png
@@ -115,8 +133,9 @@ gitlab-time-tracker/
 ## Permissions
 
 - **storage:** Save settings and task history
-- **tabs:** Communicate timer state changes to GitLab tabs
-- **host_permissions:** Access GitLab API to log time
+- **scripting:** Inject content script on GitLab pages
+- **tabs:** Detect navigation to GitLab pages
+- **optional host permissions:** Access GitLab API (granted by user)
 
 ## License
 
