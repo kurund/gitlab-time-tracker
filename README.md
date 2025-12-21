@@ -32,7 +32,6 @@ A Chrome extension that helps you track time spent on GitLab issues with automat
 ### Settings
 
 - **Embedded Settings:** Configure GitLab URL and API token directly in the popup
-- **No New Tabs:** Settings are accessible via the gear icon without opening a new page
 
 ## Installation
 
@@ -107,8 +106,6 @@ gitlab-time-tracker/
 ├── content.js         # Injects timer button on GitLab pages
 ├── popup.html         # Popup UI structure and styles
 ├── popup.js           # Popup functionality
-├── settings.html      # Legacy settings page (kept for compatibility)
-├── settings.js        # Legacy settings logic
 └── images/            # Extension icons
     ├── icon16.png
     ├── icon48.png
@@ -123,4 +120,4 @@ gitlab-time-tracker/
 
 ## License
 
-MIT
+AGPL-3.0 license
