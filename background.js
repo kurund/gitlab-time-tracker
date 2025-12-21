@@ -83,12 +83,10 @@ function addToRecentTasks(issue, timeSpent) {
 function formatDuration(seconds) {
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
-  const secs = seconds % 60;
 
   const parts = [];
   if (hours > 0) parts.push(`${hours}h`);
-  if (minutes > 0) parts.push(`${minutes}m`);
-  if (secs > 0 || parts.length === 0) parts.push(`${secs}s`);
+  if (minutes > 0 || parts.length === 0) parts.push(`${minutes}m`);
 
   return parts.join(" ");
 }
@@ -112,6 +110,11 @@ function broadcastMessage(message, isError = false) {
 }
 
 function postTimeToGitLab(issue, timeSpentInSeconds) {
+  // Ignore if less than 1 minute
+  if (timeSpentInSeconds < 60) {
+    return;
+  }
+
   chrome.storage.local.get(["gitlabUrl", "apiToken"], (result) => {
     if (!result.gitlabUrl || !result.apiToken) {
       broadcastMessage(
@@ -123,7 +126,6 @@ function postTimeToGitLab(issue, timeSpentInSeconds) {
 
     const { gitlabUrl, apiToken } = result;
     const { projectId, id: issueId } = issue;
-    const title = issue.title || "Issue";
     const url = `${gitlabUrl}/api/v4/projects/${projectId}/issues/${issueId}/add_spent_time`;
     const duration = formatDuration(timeSpentInSeconds);
 
