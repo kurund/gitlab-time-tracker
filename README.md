@@ -46,10 +46,16 @@ A Chrome extension that helps you track time spent on GitLab issues with automat
 
 ## Installation
 
+### Chrome Web Store
+
+- Extension is available here: <https://chromewebstore.google.com/detail/mkjdhmdaekgapejoinebhkaejeeooama?utm_source=item-share-cb>
+
+## From Source Code
+
 1. **Clone or download this repository:**
 
    ```bash
-   git clone https://github.com/your-username/gitlab-time-tracker.git
+   git clone https://github.com/kurund/gitlab-time-tracker.git
    ```
 
 2. **Open Chrome Extensions:**
