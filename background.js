@@ -80,6 +80,38 @@ function addToRecentTasks(issue, timeSpent) {
   });
 }
 
+function addToTimeHistory(issue, timeSpentSeconds) {
+  chrome.storage.local.get(["timeHistory"], (result) => {
+    let timeHistory = result.timeHistory || [];
+
+    timeHistory.push({
+      issueId: issue.id,
+      projectId: issue.projectId,
+      projectName: issue.projectName,
+      timestamp: Date.now(),
+      duration: timeSpentSeconds,
+    });
+
+    // Keep last 500 entries (roughly 6 months of daily tracking)
+    timeHistory = timeHistory.slice(-500);
+
+    chrome.storage.local.set({ timeHistory });
+  });
+}
+
+function parseDurationToSeconds(duration) {
+  let totalSeconds = 0;
+  const hourMatch = duration.match(/(\d+)\s*h/i);
+  const minuteMatch = duration.match(/(\d+)\s*m/i);
+  const secondMatch = duration.match(/(\d+)\s*s/i);
+
+  if (hourMatch) totalSeconds += parseInt(hourMatch[1], 10) * 3600;
+  if (minuteMatch) totalSeconds += parseInt(minuteMatch[1], 10) * 60;
+  if (secondMatch) totalSeconds += parseInt(secondMatch[1], 10);
+
+  return totalSeconds;
+}
+
 function formatDuration(seconds) {
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
@@ -167,6 +199,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       const timeSpent = Math.round((Date.now() - timerState.startTime) / 1000);
       postTimeToGitLab(timerState.issue, timeSpent);
       addToRecentTasks(timerState.issue, timeSpent);
+      addToTimeHistory(timerState.issue, timeSpent);
     }
 
     // Start new timer
@@ -186,6 +219,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
       postTimeToGitLab(timerState.issue, timeSpent);
       addToRecentTasks(timerState.issue, timeSpent);
+      addToTimeHistory(timerState.issue, timeSpent);
 
       timerState.isRunning = false;
       timerState.issue = null;
@@ -252,7 +286,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             return;
           }
 
-          addToRecentTasks(issue, 0);
+          const durationSeconds = parseDurationToSeconds(duration);
+          addToRecentTasks(issue, durationSeconds);
+          addToTimeHistory(issue, durationSeconds);
           sendResponse({ success: true });
         })
         .catch((error) => {

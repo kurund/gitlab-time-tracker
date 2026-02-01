@@ -419,6 +419,72 @@ chrome.runtime.onMessage.addListener((request) => {
   }
 });
 
+// Tab switching
+const tabs = document.querySelectorAll(".tab");
+const tasksContent = document.getElementById("tasks-content");
+const statsContent = document.getElementById("stats-content");
+
+function getStartOfWeek(date) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
+  d.setDate(diff);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function getStartOfMonth(date) {
+  const d = new Date(date);
+  d.setDate(1);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function formatStatsDuration(seconds) {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  return `${hours}h ${minutes}m`;
+}
+
+function loadStats() {
+  chrome.storage.local.get(["timeHistory"], (result) => {
+    const history = result.timeHistory || [];
+    const now = new Date();
+    const weekStart = getStartOfWeek(now).getTime();
+    const monthStart = getStartOfMonth(now).getTime();
+
+    let weeklySeconds = 0;
+    let monthlySeconds = 0;
+
+    for (const entry of history) {
+      if (entry.timestamp >= weekStart) weeklySeconds += entry.duration;
+      if (entry.timestamp >= monthStart) monthlySeconds += entry.duration;
+    }
+
+    document.getElementById("weekly-hours").textContent =
+      formatStatsDuration(weeklySeconds);
+    document.getElementById("monthly-hours").textContent =
+      formatStatsDuration(monthlySeconds);
+  });
+}
+
+tabs.forEach((tab) => {
+  tab.addEventListener("click", () => {
+    tabs.forEach((t) => t.classList.remove("active"));
+    tab.classList.add("active");
+
+    const tabName = tab.dataset.tab;
+    if (tabName === "tasks") {
+      tasksContent.style.display = "block";
+      statsContent.style.display = "none";
+    } else if (tabName === "stats") {
+      tasksContent.style.display = "none";
+      statsContent.style.display = "grid";
+      loadStats();
+    }
+  });
+});
+
 // Settings view toggle
 const tasksView = document.getElementById("tasks-view");
 const settingsView = document.getElementById("settings-view");
