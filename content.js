@@ -43,11 +43,38 @@ if (window.gitlabTimeTrackerInjected) {
 
     const projectId = document.body.dataset.projectId;
 
+    // Try to get project name from breadcrumbs or page elements
+    let projectName = null;
+    const projectNameSelectors = [
+      '.breadcrumbs-list li:last-of-type a[data-testid="breadcrumb-item-text"]',
+      ".breadcrumbs-list li:nth-last-child(2) a",
+      '[data-testid="project-name"]',
+      ".project-title",
+    ];
+    for (const selector of projectNameSelectors) {
+      const element = document.querySelector(selector);
+      if (element) {
+        projectName = element.innerText?.trim();
+        if (projectName && projectName !== "Issues") break;
+      }
+    }
+
+    // Fallback: extract from URL path
+    if (!projectName) {
+      const pathMatch = window.location.pathname.match(
+        /^\/([^/]+(?:\/[^/]+)?)(?:\/-)?\/issues/,
+      );
+      if (pathMatch) {
+        projectName = pathMatch[1].split("/").pop();
+      }
+    }
+
     if (title && issueId) {
       const issueDetails = {
         title: title,
         id: issueId,
         projectId: projectId,
+        projectName: projectName,
         url: window.location.href,
       };
       return issueDetails;

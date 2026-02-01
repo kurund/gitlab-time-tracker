@@ -153,10 +153,15 @@ function createTaskItem(task, isFavorite) {
 
   const taskMeta = document.createElement("div");
   taskMeta.className = "task-meta";
+  const metaParts = [];
+  if (task.projectName) {
+    metaParts.push(task.projectName);
+  }
   if (task.lastTracked) {
     const date = new Date(task.lastTracked);
-    taskMeta.textContent = date.toLocaleDateString();
+    metaParts.push(date.toLocaleDateString());
   }
+  taskMeta.textContent = metaParts.join(" - ");
 
   taskInfo.appendChild(taskTitle);
   taskInfo.appendChild(taskMeta);
