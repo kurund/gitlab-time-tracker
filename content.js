@@ -9,7 +9,8 @@ if (window.gitlabTimeTrackerInjected) {
     const isIssuePage =
       document.body.dataset.page === "projects:issues:show" ||
       document.querySelector('.breadcrumbs-list li a[href$="/issues"]') ||
-      window.location.pathname.includes("/issues/");
+      window.location.pathname.includes("/issues/") ||
+      window.location.pathname.includes("/work_items/");
 
     if (!isIssuePage) {
       return null;
@@ -36,7 +37,9 @@ if (window.gitlabTimeTrackerInjected) {
 
     // Get issue ID from URL
     let issueId = null;
-    const match = window.location.pathname.match(/issues\/(\d+)/);
+    const match = window.location.pathname.match(
+      /(?:issues|work_items)\/(\d+)/,
+    );
     if (match) {
       issueId = match[1];
     }
@@ -62,7 +65,7 @@ if (window.gitlabTimeTrackerInjected) {
     // Fallback: extract from URL path
     if (!projectName) {
       const pathMatch = window.location.pathname.match(
-        /^\/([^/]+(?:\/[^/]+)?)(?:\/-)?\/issues/,
+        /^\/([^/]+(?:\/[^/]+)?)(?:\/-)?\/(?:issues|work_items)/,
       );
       if (pathMatch) {
         projectName = pathMatch[1].split("/").pop();
@@ -107,7 +110,7 @@ if (window.gitlabTimeTrackerInjected) {
     if (existingCancel) existingCancel.remove();
 
     if (isRunning) {
-      button.innerHTML = stopIcon;
+      button.innerHTML = `${stopIcon}<span style="margin-left:6px;font-size:13px;font-weight:500;">Stop Timer</span>`;
       button.title = "Stop & Log Time";
       button.style.backgroundColor = "#554488";
       button.style.borderColor = "#554488";
@@ -138,7 +141,7 @@ if (window.gitlabTimeTrackerInjected) {
       };
       button.parentNode.insertBefore(cancelBtn, button.nextSibling);
     } else {
-      button.innerHTML = playIcon;
+      button.innerHTML = `${playIcon}<span style="margin-left:6px;font-size:13px;font-weight:500;">Start Timer</span>`;
       button.title = "Start Timer";
       button.style.backgroundColor = "#FC6D26";
       button.style.borderColor = "#FC6D26";
@@ -178,7 +181,7 @@ if (window.gitlabTimeTrackerInjected) {
         const button = document.createElement("button");
         button.id = "gitlab-timer-start-button";
         button.style.cssText =
-          "vertical-align: middle; margin-left: 8px; cursor: pointer; border-radius: 4px; padding: 4px 6px; border: none; display: inline-flex; align-items: center; justify-content: center;";
+          "display: inline-flex; align-items: center; justify-content: center; margin-top: 8px; cursor: pointer; border-radius: 4px; padding: 4px 6px; border: none;";
 
         // Check current timer state and set button accordingly
         safeSendMessage({ action: "getTimerState" }, (response) => {
@@ -190,13 +193,8 @@ if (window.gitlabTimeTrackerInjected) {
           updateButtonState(button, isRunning, issueDetails);
         });
 
-        // Insert button inside the h1, after the title text span
-        const titleSpan = titleElement.querySelector("span");
-        if (titleSpan) {
-          titleSpan.parentNode.insertBefore(button, titleSpan.nextSibling);
-        } else {
-          titleElement.appendChild(button);
-        }
+        // Insert button after the title element (below it)
+        titleElement.parentNode.insertBefore(button, titleElement.nextSibling);
       }
     }
   }
@@ -247,16 +245,14 @@ if (window.gitlabTimeTrackerInjected) {
   // Listen for messages from background script
   chrome.runtime.onMessage.addListener((request) => {
     if (request.action === "timerStateChanged") {
-      const button = document.getElementById("gitlab-timer-start-button");
-      if (button) {
-        const issueDetails = getIssueDetails();
-        if (issueDetails) {
-          const isRunning =
-            request.timerState.isRunning &&
-            request.timerState.issue &&
-            request.timerState.issue.id === issueDetails.id;
-          updateButtonState(button, isRunning, issueDetails);
-        }
+      const issueDetails = getIssueDetails();
+      if (issueDetails) {
+        const isRunning =
+          request.timerState.isRunning &&
+          request.timerState.issue &&
+          request.timerState.issue.id === issueDetails.id;
+        const button = document.getElementById("gitlab-timer-start-button");
+        if (button) updateButtonState(button, isRunning, issueDetails);
       }
     } else if (request.action === "showMessage") {
       showInlineMessage(request.message, request.isError);
