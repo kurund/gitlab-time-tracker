@@ -363,7 +363,9 @@ function filterTasks(query) {
   const q = query.toLowerCase();
   const filtered = allTasks.filter(
     (task) =>
-      task.title.toLowerCase().includes(q) || task.id.toString().includes(q),
+      task.title.toLowerCase().includes(q) ||
+      task.id.toString().includes(q) ||
+      (task.projectName && task.projectName.toLowerCase().includes(q)),
   );
   renderTasks(filtered);
 

@@ -73,8 +73,8 @@ function addToRecentTasks(issue, timeSpent) {
     // Add to beginning
     recentTasks.unshift(taskEntry);
 
-    // Keep only last 50 tasks
-    recentTasks = recentTasks.slice(0, 50);
+    // Keep only last 100 tasks
+    recentTasks = recentTasks.slice(0, 100);
 
     chrome.storage.local.set({ recentTasks });
   });
