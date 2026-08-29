@@ -76,6 +76,13 @@ function updateTimerDisplay(timerState) {
 
       timerIssue.appendChild(issueLink);
 
+      if (timerState.issue.projectName) {
+        const projectLabel = document.createElement("div");
+        projectLabel.className = "timer-project";
+        projectLabel.textContent = timerState.issue.projectName;
+        timerIssue.appendChild(projectLabel);
+      }
+
       const timerTime = document.createElement("div");
       timerTime.className = "timer-time";
       timerTime.textContent = formatTime(elapsed);
