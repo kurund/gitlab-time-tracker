@@ -540,4 +540,14 @@ openSettingsBtn.addEventListener("click", showSettingsView);
 backToTasksBtn.addEventListener("click", showTasksView);
 saveSettingsBtn.addEventListener("click", saveSettings);
 gitlabUrlInput.addEventListener("input", updatePermissionStatus);
+
+// auto-save each settings field on blur
+gitlabUrlInput.addEventListener("blur", () => {
+  const val = gitlabUrlInput.value.trim().replace(/\/$/, "");
+  if (val) chrome.storage.local.set({ gitlabUrl: val });
+});
+apiTokenInput.addEventListener("blur", () => {
+  const val = apiTokenInput.value.trim();
+  if (val) chrome.storage.local.set({ apiToken: val });
+});
 requestPermissionBtn.addEventListener("click", requestPermission);
