@@ -212,8 +212,21 @@ if (window.gitlabTimeTrackerInjected) {
           updateButtonState(button, isRunning, issueDetails);
         });
 
-        // Insert button after the title element (below it)
-        titleElement.parentNode.insertBefore(button, titleElement.nextSibling);
+        // Fixes for older version of gitlab
+        // Walk up through any flex ancestors so the button lands below the
+        // entire header row rather than inside it as a sibling flex item.
+        let anchor = titleElement;
+        let parent = anchor.parentNode;
+        while (parent && parent !== document.body) {
+          const display = window.getComputedStyle(parent).display;
+          if (display === "flex" || display === "inline-flex") {
+            anchor = parent;
+            parent = parent.parentNode;
+          } else {
+            break;
+          }
+        }
+        anchor.parentNode.insertBefore(button, anchor.nextSibling);
       }
     }
   }
