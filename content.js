@@ -5,23 +5,36 @@ if (window.gitlabTimeTrackerInjected) {
   window.gitlabTimeTrackerInjected = true;
 
   function getIssueDetails() {
-    // Check if we're on an issue page
+    // Parse 'show' param used by GitLab drawer mode (base64 JSON: {iid, full_path, id})
+    const urlParams = new URLSearchParams(window.location.search);
+    let showData = null;
+    try {
+      const showParam = urlParams.get("show");
+      if (showParam) showData = JSON.parse(atob(showParam));
+    } catch (e) {
+      // ignore malformed param
+    }
+
+    // Check if we're on an issue page (full page or drawer/side panel)
     const isIssuePage =
       document.body.dataset.page === "projects:issues:show" ||
       document.querySelector('.breadcrumbs-list li a[href$="/issues"]') ||
       window.location.pathname.includes("/issues/") ||
-      window.location.pathname.includes("/work_items/");
+      window.location.pathname.includes("/work_items/") ||
+      showData !== null;
 
     if (!isIssuePage) {
       return null;
     }
 
-    // Try multiple selectors to find the title
+    // Try multiple selectors to find the title (full page and drawer)
     const titleSelectors = [
       'h1[data-testid="work-item-title"] span',
       'h1[data-testid="issue-title"] span',
       'h1[data-testid="work-item-title"]',
       'h1[data-testid="issue-title"]',
+      'h2[data-testid="work-item-title"] span',
+      'h2[data-testid="work-item-title"]',
       ".issue-details h1.title",
       ".detail-page-header h1",
     ];
@@ -35,13 +48,15 @@ if (window.gitlabTimeTrackerInjected) {
       }
     }
 
-    // Get issue ID from URL
+    // Get issue ID from URL path, or from decoded 'show' param (drawer mode)
     let issueId = null;
     const match = window.location.pathname.match(
       /(?:issues|work_items)\/(\d+)/,
     );
     if (match) {
       issueId = match[1];
+    } else if (showData?.iid) {
+      issueId = showData.iid;
     }
 
     const projectId = document.body.dataset.projectId;
@@ -62,7 +77,10 @@ if (window.gitlabTimeTrackerInjected) {
       }
     }
 
-    // Fallback: extract from URL path
+    // Fallback: use full_path from 'show' param, then URL path
+    if (!projectName && showData?.full_path) {
+      projectName = showData.full_path.split("/").pop();
+    }
     if (!projectName) {
       const pathMatch = window.location.pathname.match(
         /^\/([^/]+(?:\/[^/]+)?)(?:\/-)?\/(?:issues|work_items)/,
@@ -163,10 +181,11 @@ if (window.gitlabTimeTrackerInjected) {
   function injectStartButton() {
     const issueDetails = getIssueDetails();
     if (issueDetails && !document.getElementById("gitlab-timer-start-button")) {
-      // Try multiple selectors to find the title element
+      // Try multiple selectors to find the title element (full page and drawer)
       const titleSelectors = [
         'h1[data-testid="work-item-title"]',
         'h1[data-testid="issue-title"]',
+        'h2[data-testid="work-item-title"]',
         ".issue-details h1.title",
         ".detail-page-header h1",
       ];
@@ -199,17 +218,29 @@ if (window.gitlabTimeTrackerInjected) {
     }
   }
 
-  const observer = new MutationObserver((mutations) => {
-    for (const mutation of mutations) {
-      if (mutation.type === "childList") {
-        injectStartButton();
-      }
-    }
+  let injectRetryTimer = null;
+  const observer = new MutationObserver(() => {
+    injectStartButton();
+    // Debounced retry — drawer content renders async so title may not be in DOM yet
+    clearTimeout(injectRetryTimer);
+    injectRetryTimer = setTimeout(injectStartButton, 800);
   });
 
   observer.observe(document.body, {
     childList: true,
     subtree: true,
+  });
+
+  // Detect SPA navigation (GitLab pushes history when opening drawer)
+  const originalPushState = history.pushState.bind(history);
+  history.pushState = function (...args) {
+    originalPushState(...args);
+    clearTimeout(injectRetryTimer);
+    injectRetryTimer = setTimeout(injectStartButton, 800);
+  };
+  window.addEventListener("popstate", () => {
+    clearTimeout(injectRetryTimer);
+    injectRetryTimer = setTimeout(injectStartButton, 800);
   });
 
   function showInlineMessage(message, isError = false) {
