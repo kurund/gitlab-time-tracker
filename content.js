@@ -197,10 +197,17 @@ if (window.gitlabTimeTrackerInjected) {
       }
 
       if (titleElement) {
+        // Wrapper keeps button + cancel together regardless of parent layout
+        const wrapper = document.createElement("div");
+        wrapper.id = "gitlab-timer-wrapper";
+        wrapper.style.cssText = "display: inline-flex; align-items: center; gap: 6px; margin-top: 8px;";
+
         const button = document.createElement("button");
         button.id = "gitlab-timer-start-button";
         button.style.cssText =
-          "display: inline-flex; align-items: center; justify-content: center; margin-top: 8px; cursor: pointer; border-radius: 4px; padding: 4px 6px; border: none; white-space: nowrap;";
+          "display: inline-flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 4px; padding: 4px 6px; border: none; white-space: nowrap;";
+
+        wrapper.appendChild(button);
 
         // Check current timer state and set button accordingly
         safeSendMessage({ action: "getTimerState" }, (response) => {
@@ -212,9 +219,8 @@ if (window.gitlabTimeTrackerInjected) {
           updateButtonState(button, isRunning, issueDetails);
         });
 
-        // Fixes for older version of gitlab
-        // Walk up through any flex ancestors so the button lands below the
-        // entire header row rather than inside it as a sibling flex item.
+        // Walk up through flex ancestors so the wrapper lands below the
+        // header row rather than inside it as a sibling flex item.
         let anchor = titleElement;
         let parent = anchor.parentNode;
         while (parent && parent !== document.body) {
@@ -226,7 +232,7 @@ if (window.gitlabTimeTrackerInjected) {
             break;
           }
         }
-        anchor.parentNode.insertBefore(button, anchor.nextSibling);
+        anchor.parentNode.insertBefore(wrapper, anchor.nextSibling);
       }
     }
   }
