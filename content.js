@@ -279,6 +279,7 @@ if (window.gitlabTimeTrackerInjected) {
       border-radius: 4px;
       font-size: 12px;
       font-weight: 500;
+      white-space: nowrap;
       background: ${isError ? "#fde8e8" : "#e8f5e9"};
       color: ${isError ? "#c62828" : "#2e7d32"};
       vertical-align: middle;
