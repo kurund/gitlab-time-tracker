@@ -200,7 +200,7 @@ if (window.gitlabTimeTrackerInjected) {
         const button = document.createElement("button");
         button.id = "gitlab-timer-start-button";
         button.style.cssText =
-          "display: inline-flex; align-items: center; justify-content: center; margin-top: 8px; cursor: pointer; border-radius: 4px; padding: 4px 6px; border: none;";
+          "display: inline-flex; align-items: center; justify-content: center; margin-top: 8px; cursor: pointer; border-radius: 4px; padding: 4px 6px; border: none; white-space: nowrap;";
 
         // Check current timer state and set button accordingly
         safeSendMessage({ action: "getTimerState" }, (response) => {
