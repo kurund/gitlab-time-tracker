@@ -145,7 +145,7 @@ if (window.gitlabTimeTrackerInjected) {
       cancelBtn.textContent = "Cancel";
       cancelBtn.title = "Cancel timer without logging";
       cancelBtn.style.cssText =
-        "vertical-align: middle; margin-left: 6px; cursor: pointer; border-radius: 4px; padding: 4px 8px; border: none; background: none; color: #888; font-size: 12px;";
+        "cursor: pointer; border-radius: 4px; padding: 4px 8px; border: 1px solid #ccc; background: none; color: #888; font-size: 12px;";
       cancelBtn.onmouseover = () => {
         cancelBtn.style.color = "#554488";
       };
