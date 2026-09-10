@@ -151,7 +151,8 @@ function postTimeToGitLab(issue, timeSpentInSeconds) {
           throw new Error(errorMsg);
         }
 
-        broadcastMessage(`${duration} logged to #${issueId}`);
+        const projectPrefix = issue.projectName ? `${issue.projectName} ` : "";
+        broadcastMessage(`${duration} logged to ${projectPrefix}#${issueId}`);
       })
       .catch((error) => {
         broadcastMessage(`Failed to log time: ${error.message}`, true);
@@ -208,7 +209,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       chrome.storage.local.set({ timerState });
       updateBadge();
       broadcastTimerState();
-      broadcastMessage(`Timer cancelled for #${issue.id}`);
+      const projectPrefix = issue.projectName ? `${issue.projectName} ` : "";
+      broadcastMessage(`Timer cancelled for ${projectPrefix}#${issue.id}`);
     }
     sendResponse({ status: "Timer cancelled" });
   } else if (request.action === "getTimerState") {
