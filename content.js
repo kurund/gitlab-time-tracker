@@ -91,12 +91,16 @@ if (window.gitlabTimeTrackerInjected) {
     }
 
     if (title && issueId) {
+      // In drawer mode the page URL is the list URL — build the real issue URL
+      const url = showData?.full_path
+        ? `${window.location.origin}/${showData.full_path}/-/work_items/${issueId}`
+        : window.location.href;
       const issueDetails = {
         title: title,
         id: issueId,
         projectId: projectId,
         projectName: projectName,
-        url: window.location.href,
+        url,
       };
       return issueDetails;
     }
